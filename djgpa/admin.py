@@ -16,5 +16,10 @@ class PreferencesAdmin(PreferencesAdmin):
     def has_add_permission(self, request):
         return False
 
+    class Media:
+        js = (
+            '/static/admin/js/djgpa.js',
+        )
+
 
 admin.site.register(GooglePlayPreferences, PreferencesAdmin)
