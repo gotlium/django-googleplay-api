@@ -1,0 +1,129 @@
+# -*- coding: utf-8 -*-
+
+import datetime
+import urllib
+import os
+
+import grab
+import pb2
+
+from .models import GooglePlayPreferences
+from .configs import (
+    AUTH_VALUES, REQUEST_HEADERS_TO_API, URL_LOGIN,
+    TOKEN_FILE, TOKEN_TTL, REQUEST_URL, DOWNLOAD_AGENT)
+
+
+class GooglePlay(object):
+    def __init__(self):
+        conf = GooglePlayPreferences.objects.all()[0]
+        if conf.proxy_host and conf.proxy_port:
+            self.proxy = '%s:%s' % (conf.proxy_host, conf.proxy_port)
+        if conf.proxy_login and conf.proxy_password:
+            self.proxy_auth = '%s:%s' % (conf.proxy_login, conf.proxy_password)
+        self.proxy_enabled = conf.proxy_enabled
+        self.token = None
+
+        AUTH_VALUES['Email'] = conf.google_login
+        AUTH_VALUES['Passwd'] = conf.google_password
+        AUTH_VALUES['androidId'] = conf.android_id
+        REQUEST_HEADERS_TO_API['X-DFE-Device-Id'] = conf.android_id
+
+    def _get(self, url, **kwargs):
+        grabber = grab.Grab()
+        grabber.reset()
+        grabber.setup(
+            connect_timeout=5, timeout=300, hammer_mode=True,
+            hammer_timeouts=((300, 360), (360, 420), (420, 480)),
+        )
+        if kwargs:
+            grabber.setup(**kwargs)
+        if self.proxy_enabled:
+            if hasattr(self, 'proxy'):
+                grabber.setup(proxy=self.proxy, proxy_type='http')
+            if hasattr(self, 'proxy_auth'):
+                grabber.setup(proxy_userpwd=self.proxy_auth)
+        grabber.go(url)
+        return grabber.response.body
+
+    def _login_parse_response(self, data):
+        params = {}
+        for line in data:
+            if not "=" in line:
+                continue
+            key, val = line.split("=")
+            params[key.strip().lower()] = val.strip()
+        return params
+
+    def _login(self):
+        headers = {"Accept-Encoding": ""}
+        response = self._get(URL_LOGIN, post=AUTH_VALUES, headers=headers)
+        params = self._login_parse_response(response.split())
+        if "auth" in params:
+            return params["auth"]
+        elif "error" in params:
+            raise Exception("server says: " + params["error"])
+
+    def _save_token(self):
+        file_obj = open(TOKEN_FILE, 'w')
+        file_obj.write(self.token)
+        file_obj.close()
+
+    def _remove_token(self):
+        timestamp = os.stat(TOKEN_FILE).st_ctime
+        create_time = datetime.datetime.fromtimestamp(timestamp)
+        now = datetime.datetime.now()
+        if (now - create_time).days > TOKEN_TTL:
+            os.remove(TOKEN_FILE)
+            return True
+
+    def _executeRequestApi2(self, path, **kwargs):
+        headers = REQUEST_HEADERS_TO_API
+        headers["Authorization"] = "GoogleLogin auth=%s" % self.token
+        url = REQUEST_URL % path
+        response = self._get(url, headers=headers, **kwargs)
+        return pb2.ResponseWrapper.FromString(response)
+
+    def auth(self):
+        if os.path.exists(TOKEN_FILE):
+            if self._remove_token():
+                self.auth()
+            self.token = open(TOKEN_FILE).readline(1024)
+        else:
+            self.token = self._login()
+            self._save_token()
+        return self
+
+    def search(self, query, nb_results=None, offset=None):
+        path = {'q': query, 'c': 3}
+        if nb_results is not None:
+            path['n'] = int(nb_results)
+        if offset is not None:
+            path['o'] = int(offset)
+        path = 'search?%s' % urllib.urlencode(path)
+        return self._executeRequestApi2(path).payload.searchResponse
+
+    def details(self, package_name):
+        path = "details?%s" % urllib.urlencode({'doc': package_name})
+        return self._executeRequestApi2(path).payload.detailsResponse
+
+    def download(self, package_name, location, details=None):
+        details = details and details or self.details(package_name)
+        doc = details.docV2
+        versionCode = doc.details.appDetails.versionCode
+        offerType = doc.offer[0].offerType
+        response = self._executeRequestApi2(
+            "purchase", post={
+                'ot': offerType,
+                'doc': package_name,
+                'vc': versionCode
+            }
+        ).payload.buyResponse.purchaseStatusResponse.appDeliveryData
+
+        url = response.downloadUrl
+        cookie = response.downloadAuthCookie[0]
+        cookies = {str(cookie.name): str(cookie.value)}
+        headers = {"User-Agent": DOWNLOAD_AGENT, "Accept-Encoding": ""}
+
+        response = self._get(url, headers=headers, cookies=cookies)
+        with open(location, 'wb') as out:
+            out.write(response)
