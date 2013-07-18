@@ -29,10 +29,10 @@ class GooglePlay(object):
 
         if not conf.count():
             raise ObjectDoesNotExist('Config not exists.')
-        elif not (conf[0].google_login != "" and conf[0].google_password != ""):
+        if not (conf[0].google_login != "" and conf[0].google_password != ""):
             raise AccountWasNotInstalled(
                 'Google accounts was not installed.')
-        elif not conf[0].android_id:
+        if not conf[0].android_id:
             raise DeviceIDIsNotSet('Device ID is not set.')
 
         conf = conf[0]

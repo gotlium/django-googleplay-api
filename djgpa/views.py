@@ -5,7 +5,7 @@ from subprocess import Popen, STDOUT, PIPE
 from django.http import HttpResponse
 
 from .models import GooglePlayPreferences
-from .configs import *
+from .configs import AID_GENERATOR
 
 
 CMD = "java -jar %s '%s' '%s' 2>&1 | grep AndroidId | awk '{print $2}'"
