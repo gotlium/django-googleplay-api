@@ -18,7 +18,7 @@ class PreferencesAdmin(PreferencesAdmin):
 
     class Media:
         js = (
-            '/static/admin/js/djgpa.js',
+            '/static/djgpa/admin/js/djgpa.js',
         )
 
 

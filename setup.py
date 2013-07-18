@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from djgpa import VERSION
 
 
@@ -11,14 +11,22 @@ setup(
     author="GoTLiuM InSPiRiT",
     author_email='gotlium@gmail.com',
     url='http://github.com/gotlium/django-googleplay-api',
-    packages=['djgpa'],
+    packages=find_packages(exclude=['demo']),
     package_data={'djgpa': [
         'android-checkin/*.jar',
-        'static/admin/js/djgpa.js',
+        'static/djgpa/admin/js/djgpa.js',
     ]},
     include_package_data=True,
     install_requires=[
-        'setuptools', 'gdata', 'django', 'django-preferences', 'protobuf'],
+        'setuptools',
+        'gdata',
+        'django',
+        'django-preferences',
+        'protobuf',
+        'pycurl',
+        'lxml',
+        'grab == 0.4.8',
+    ],
     zip_safe=False,
     classifiers=[
         'Development Status :: 5 - Production/Stable',

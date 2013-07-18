@@ -1,6 +1,11 @@
 Django-GooglePlay-API
 =====================
 
+.. image:: https://api.travis-ci.org/gotlium/django-googleplay-api.png?branch=master
+    :alt: Build Status
+    :target: https://travis-ci.org/gotlium/django-googleplay-api
+
+
 With this package, you can configure device id and proxy params,
 for google play api. Also you can change google account, and link device
 with new or existing account.

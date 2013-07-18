@@ -7,15 +7,36 @@ import os
 import grab
 import pb2
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from .models import GooglePlayPreferences
 from .configs import (
     AUTH_VALUES, REQUEST_HEADERS_TO_API, URL_LOGIN,
     TOKEN_FILE, TOKEN_TTL, REQUEST_URL, DOWNLOAD_AGENT)
 
 
+class AccountWasNotInstalled(Exception):
+    """ Google accounts was not installed """
+
+
+class DeviceIDIsNotSet(Exception):
+    """ Device ID is not set. """
+
+
 class GooglePlay(object):
     def __init__(self):
-        conf = GooglePlayPreferences.objects.all()[0]
+        conf = GooglePlayPreferences.objects.all()
+
+        if not conf.count():
+            raise ObjectDoesNotExist('Config not exists.')
+        elif not (conf[0].google_login != "" and conf[0].google_password != ""):
+            raise AccountWasNotInstalled(
+                'Google accounts was not installed.')
+        elif not conf[0].android_id:
+            raise DeviceIDIsNotSet('Device ID is not set.')
+
+        conf = conf[0]
+
         if conf.proxy_host and conf.proxy_port:
             self.proxy = '%s:%s' % (conf.proxy_host, conf.proxy_port)
         if conf.proxy_login and conf.proxy_password:
@@ -130,3 +151,4 @@ class GooglePlay(object):
         response = self._get(url, headers=headers, cookies=cookies)
         with open(location, 'wb') as out:
             out.write(response)
+        return True
