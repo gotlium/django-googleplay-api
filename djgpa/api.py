@@ -24,7 +24,7 @@ class DeviceIDIsNotSet(Exception):
 
 
 class GooglePlay(object):
-    def __init__(self):
+    def __init__(self, token=None):
         conf = GooglePlayPreferences.objects.all()
 
         if not conf.count():
@@ -42,7 +42,7 @@ class GooglePlay(object):
         if conf.proxy_login and conf.proxy_password:
             self.proxy_auth = '%s:%s' % (conf.proxy_login, conf.proxy_password)
         self.proxy_enabled = conf.proxy_enabled
-        self.token = None
+        self.token = token
 
         AUTH_VALUES['Email'] = conf.google_login
         AUTH_VALUES['Passwd'] = conf.google_password
@@ -104,7 +104,9 @@ class GooglePlay(object):
         return pb2.ResponseWrapper.FromString(response)
 
     def auth(self):
-        if os.path.exists(TOKEN_FILE):
+        if self.token:
+            pass
+        elif os.path.exists(TOKEN_FILE):
             if self._remove_token():
                 self.auth()
             self.token = open(TOKEN_FILE).readline(1024)

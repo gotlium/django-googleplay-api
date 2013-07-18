@@ -17,6 +17,12 @@ class DjGPATestCase(TestCase):
         self.app_id = 'com.google.android.apps.unveil'
         self.app_name = 'Google Goggles'
         self.app_dst = '/tmp/app.apk'
+        self.token = str(
+            'DQAAAL0AAAClqUgv7PDA7BctkTZ6M9Jd1DMJ1eLGG6jcBoVdTln7JXCofBdBRbPx'
+            'd3408fRURiJIpJnyQ8AYnoHXtw1vyeoYMiid8Q4Cqr8d82teLbQNxn2ijKZgcdQB'
+            '67aEmIhhKQDE3QVgwGUZsdCTU04AZWCLFGDaY-Ogf7qzQ2PAwz6XNyM7c23tCO6r'
+            '9AY1JFphaxrcac3zQyjoRr1A2YiMYUJpE2l278wUPTyx9Di9kgpAlrtzAgeqDPe3'
+            '1VPAtmlK1G4')
 
     def _install_account(self):
         GooglePlayPreferences.objects.create(
@@ -25,7 +31,7 @@ class DjGPATestCase(TestCase):
             google_password=self.password
         )
         self.assertEqual(GooglePlayPreferences.objects.all().count(), 1)
-        return GooglePlay().auth()
+        return GooglePlay(self.token).auth()
 
     def test_a_settings_is_set(self):
         self.assertRaises(ObjectDoesNotExist, GooglePlay)
