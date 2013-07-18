@@ -72,6 +72,6 @@ REQUEST_POST_CONTENT_TYPE = get_settings(
     "application/x-www-form-urlencoded; charset=UTF-8")
 
 TOKEN_FILE = get_settings('TOKEN_FILE', "/tmp/google.token")
-TOKEN_TTL = get_settings('TOKEN_TTL', 1)
+TOKEN_TTL = get_settings('TOKEN_TTL', 3)
 
 AID_GENERATOR = location('android-checkin/android-checkin.jar')

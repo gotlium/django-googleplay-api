@@ -55,8 +55,8 @@ class GooglePlay(object):
         return params
 
     def _login(self):
-        headers = {"Accept-Encoding": ""}
-        response = self._get(URL_LOGIN, post=AUTH_VALUES, headers=headers)
+        response = self._get(
+            URL_LOGIN, post=AUTH_VALUES, headers={"Accept-Encoding": ""})
         params = self._login_parse_response(response.split())
         if "auth" in params:
             return params["auth"]
@@ -64,13 +64,12 @@ class GooglePlay(object):
             raise Exception("server says: " + params["error"])
 
     def _save_token(self):
-        file_obj = open(TOKEN_FILE, 'w')
-        file_obj.write(self.token)
-        file_obj.close()
+        with open(TOKEN_FILE, 'w') as file_obj:
+            file_obj.write(self.token)
 
     def _remove_token(self):
-        timestamp = os.stat(TOKEN_FILE).st_ctime
-        create_time = datetime.datetime.fromtimestamp(timestamp)
+        create_time = datetime.datetime.fromtimestamp(
+            os.stat(TOKEN_FILE).st_ctime)
         now = datetime.datetime.now()
         if (now - create_time).days > TOKEN_TTL:
             os.remove(TOKEN_FILE)
@@ -100,7 +99,11 @@ class GooglePlay(object):
         if offset is not None:
             path['o'] = int(offset)
         path = 'search?%s' % urllib.urlencode(path)
-        return self._executeRequestApi2(path).payload.searchResponse
+        results = self._executeRequestApi2(path).payload.searchResponse
+        try:
+            return results.doc[0].child
+        except IndexError:
+            return []
 
     def details(self, package_name):
         path = "details?%s" % urllib.urlencode({'doc': package_name})

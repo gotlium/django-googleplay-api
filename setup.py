@@ -12,6 +12,10 @@ setup(
     author_email='gotlium@gmail.com',
     url='http://github.com/gotlium/django-googleplay-api',
     packages=['djgpa'],
+    package_data={'djgpa': [
+        'android-checkin/*.jar',
+        'static/admin/js/djgpa.js',
+    ]},
     include_package_data=True,
     install_requires=[
         'setuptools', 'gdata', 'django', 'django-preferences', 'protobuf'],
