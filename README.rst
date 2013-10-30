@@ -49,3 +49,9 @@ Usage example:
 >>> print details.docV2.title, details.docV2.creator
 >>> # Download app
 >>> api.download('com.google.android.apps.docs', '~/Download/chrome.apk')
+
+
+.. image:: https://d2weczhvl823v0.cloudfront.net/gotlium/django-googleplay-api/trend.png
+   :alt: Bitdeli badge
+   :target: https://bitdeli.com/free
+
