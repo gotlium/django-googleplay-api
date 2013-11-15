@@ -18,14 +18,12 @@ setup(
     ]},
     include_package_data=True,
     install_requires=[
-        'setuptools',
         'gdata',
-        'django',
         'django-preferences',
         'protobuf',
         'pycurl',
         'lxml',
-        'grab == 0.4.8',
+        'grab',
     ],
     zip_safe=False,
     classifiers=[

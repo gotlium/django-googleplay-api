@@ -1,0 +1,3 @@
+include requirements/*
+recursive-exclude * .DS_Store
+recursive-include geoip *.py *.html *.txt *.po *.jar *.js

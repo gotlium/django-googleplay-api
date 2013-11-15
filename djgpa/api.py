@@ -15,6 +15,11 @@ from .configs import (
     TOKEN_FILE, TOKEN_TTL, REQUEST_URL, DOWNLOAD_AGENT)
 
 
+from google.protobuf.internal.containers import RepeatedCompositeFieldContainer
+from google.protobuf.message import Message
+from google.protobuf import descriptor
+
+
 class AccountWasNotInstalled(Exception):
     """ Google accounts was not installed """
 
@@ -48,6 +53,33 @@ class GooglePlay(object):
         AUTH_VALUES['Passwd'] = conf.google_password
         AUTH_VALUES['androidId'] = conf.android_id
         REQUEST_HEADERS_TO_API['X-DFE-Device-Id'] = conf.android_id
+
+    def toDict(self, protoObj):
+        """Converts the (protobuf) result from an API call into a dict, for
+        easier introspection."""
+        iterable = False
+        if isinstance(protoObj, RepeatedCompositeFieldContainer):
+            iterable = True
+        else:
+            protoObj = [protoObj]
+        retlist = []
+
+        for po in protoObj:
+            msg = dict()
+            for fielddesc, value in po.ListFields():
+                if fielddesc.type == descriptor.FieldDescriptor.TYPE_GROUP or (
+                    isinstance(value, RepeatedCompositeFieldContainer)
+                ) or (isinstance(value, Message)):
+                    msg[fielddesc.name] = self.toDict(value)
+                else:
+                    msg[fielddesc.name] = value
+            retlist.append(msg)
+        if not iterable:
+            if len(retlist) > 0:
+                return retlist[0]
+            else:
+                return None
+        return retlist
 
     def _get(self, url, **kwargs):
         grabber = grab.Grab()
@@ -154,3 +186,21 @@ class GooglePlay(object):
         with open(location, 'wb') as out:
             out.write(response)
         return True
+
+    def browse(self, cat=None, ctr=None):
+        path = "browse?c=3"
+        if cat is not None:
+            path += "&cat=%s" % cat
+        if ctr is not None:
+            path += "&ctr=%s" % ctr
+        return self._executeRequestApi2(path).payload.browseResponse
+
+    def list(self, cat, ctr=None, nb_results=None, offset=None):
+        path = "list?c=3&cat=%s" % cat
+        if ctr is not None:
+            path += "&ctr=%s" % ctr
+        if nb_results is not None:
+            path += "&n=%s" % nb_results
+        if offset is not None:
+            path += "&o=%s" % offset
+        return self._executeRequestApi2(path).payload.listResponse

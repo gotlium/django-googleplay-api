@@ -1,0 +1,7 @@
+django-preferences==0.0.6
+Django==1.6
+gdata==2.0.18
+grab==0.4.13
+lxml==3.2.4
+protobuf==2.5.0
+pycurl==7.19.0.2
