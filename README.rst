@@ -6,10 +6,10 @@ Django-GooglePlay-API
     :target: https://travis-ci.org/gotlium/django-googleplay-api
 .. image:: https://coveralls.io/repos/gotlium/django-googleplay-api/badge.png?branch=master
     :target: https://coveralls.io/r/gotlium/django-googleplay-api?branch=master
-.. image:: https://pypip.in/v/django-googleplay-api/badge.png
+.. image:: https://img.shields.io/pypi/v/django-googleplay-api.svg
     :alt: Current version on PyPi
     :target: https://crate.io/packages/django-googleplay-api/
-.. image:: https://pypip.in/d/django-googleplay-api/badge.png
+.. image:: https://img.shields.io/pypi/dm/django-googleplay-api.svg
     :alt: Downloads from PyPi
     :target: https://crate.io/packages/django-googleplay-api/
 
