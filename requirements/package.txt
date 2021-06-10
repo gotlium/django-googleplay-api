@@ -1,5 +1,5 @@
 django-preferences==0.0.6
-Django==1.6
+Django==2.2.24
 gdata==2.0.18
 grab==0.4.13
 lxml==3.2.4
